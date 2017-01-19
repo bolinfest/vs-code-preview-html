@@ -26,3 +26,8 @@ function tryFetch() {
 
 document.getElementById('fetch')
   .addEventListener('click', tryFetch, false);
+
+var ws = new WebSocket(`ws://localhost:${WS_PORT}`);
+ws.onopen = function() {
+  ws.send('I have a message for you!');
+};
