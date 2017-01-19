@@ -29,5 +29,8 @@ document.getElementById('fetch')
 
 var ws = new WebSocket(`ws://localhost:${WS_PORT}`);
 ws.onopen = function() {
+  ws.onmessage = function(message) {
+    console.log(`Message received in Embedded Pane: ${message.data}`);
+  };
   ws.send('I have a message for you!');
 };

@@ -13,7 +13,8 @@ function onDidWebSocketServerStartListening(server, context) {
     // Note that message is always a string, never a Buffer.
     ws.on('message', message => {
       if (typeof message === 'string') {
-        console.log(`Message received: ${message}`);
+        console.log(`Message received in Extension Host: ${message}`);
+        ws.send('Roger that.');
       } else {
         console.error(`Unhandled message type: ${typeof message}`);
       }
