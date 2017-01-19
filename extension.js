@@ -78,7 +78,7 @@ function activate(context) {
     // Note that the following code relies on the second argument to
     // registerCommand() being executed asynchronously because `promise` has not
     // been assigned yet.
-    var disposable = vscode.commands.registerCommand('extension.sayHello', function () {
+    var disposable = vscode.commands.registerCommand('extension.testPreviewHtmlCommunication', function () {
       promise.then(() => {
         vscode.commands.executeCommand(
           'vscode.previewHtml',

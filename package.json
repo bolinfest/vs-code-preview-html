@@ -11,13 +11,13 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onCommand:extension.testPreviewHtmlCommunication"
     ],
     "main": "./extension",
     "contributes": {
         "commands": [{
-            "command": "extension.sayHello",
-            "title": "Hello World"
+            "command": "extension.testPreviewHtmlCommunication",
+            "title": "Test vscode.previewHtml() communication"
         }]
     },
     "scripts": {
