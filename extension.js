@@ -16,8 +16,13 @@ function activate(context) {
     var disposable = vscode.commands.registerCommand('extension.sayHello', function () {
         // The code you place here will be executed every time your command is executed
 
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
+        var promise = vscode.commands.executeCommand(
+            'vscode.previewHtml',
+            `file://${context.asAbsolutePath('example.html')}`,
+            vscode.ViewColumn.Two,
+            'My Window'
+        );
+        promise.then(() => console.log('success!'), error => console.error(error));
     });
 
     context.subscriptions.push(disposable);
