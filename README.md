@@ -1,65 +1,30 @@
-# vs-code-preview-html README
+# vs-code-preview-html
 
-This is the README for your extension "vs-code-preview-html". After writing up a brief description, we recommend including the following sections.
+This is a demo to see what is possible with respect to extending VS Code with
+custom UI. This is a simple extension that inserts custom UI in an editor pane
+by doing the following:
 
-## Features
+* Starts a `WebSocketServer` on an ephemeral port when the extension is activated.
+* Once the server is initialized, the extension finds out which port is being used
+and creates a [`TextDocumentContentProvider`](https://code.visualstudio.com/Docs/extensionAPI/vscode-api#TextDocumentContentProvider)
+that returns custom HTML with the port number embedded in it.
+* We call `vscode.previewHtml` with a URI that is associated with our
+`TextDocumentContentProvider`.
+* An embedded pane is loaded with our HTML, which loads some JavaScript that
+creates a new `WebSocket` that connects to the `WebSocketServer`.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Once this connection is established, the unprivileged, embedded pane can make
+requests to the privileged extension host. Using this mechanism, it seems like
+we can define a protocol on this channel that enables RPCs, registering
+subscriptions, etc.
 
-For example if there is an image subfolder under your extension project workspace:
+## Notable Drawbacks
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+* The only place we can add UI to VS Code is in one of these editor panes.
+We cannot, for example, add a pane to the bottom of the window like the debug
+console or a dialog like the command palette.
+* Although sandboxing my UI should make VS Code overall more performant, it is
+certainly inconvenient being unable to share memory between the extension host
+and the embedded pane. All data must be serialized/deserialized between the two.
+* I could not develop this extension using [Flow](https://flowtype.org/). I
+wasn't keen to use TypeScript, so I ended up sticking to raw JavaScript.
