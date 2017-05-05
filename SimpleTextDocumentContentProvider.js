@@ -1,12 +1,15 @@
 class SimpleTextDocumentContentProvider {
-  constructor(connection) {
-    // connection is a WebSocketTransport from nuclide-proxy.
-    this._connection = connection;
+  constructor(connectionWrapper) {
+    this._connectionWrapper = connectionWrapper;
   }
 
   provideTextDocumentContent(uri/*: vscode.Uri*/)/*: string | Promise<string> */ {
-    // TODO(mbolin): Fetch the contents via _connection.
-    return '<!doctype html><html><body>I am HTML content!</body></html>';
+    // Due to the construction of the vscode.Uri, uri.path is the absolute path
+    // on the remote matchine.
+    return this._connectionWrapper.makeRpc(
+      'get-file-contents',
+      {path: uri.path}
+    ).then(response => response.contents);
   }
 }
 

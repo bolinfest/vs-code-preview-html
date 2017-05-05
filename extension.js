@@ -2,6 +2,7 @@ const invariant = require('assert');
 const vscode = require('vscode');
 const {Server: WebSocketServer} = require('ws');
 const {createConnection} = require('./connection');
+const {ConnectionWrapper} = require('./ConnectionWrapper');
 const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContentProvider');
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
@@ -15,7 +16,8 @@ function onDidWebSocketServerStartListening(server, context) {
 
   server.on('connection', ws => {
     // This is a WebSocketTransport from nuclide-proxy.
-    let connection = null;
+    let connection;
+    let connectionWrapper;
     let simpleContentProvider;
 
     // Note that message is always a string, never a Buffer.
@@ -44,7 +46,12 @@ function onDidWebSocketServerStartListening(server, context) {
           ws
         ).then(webSocketTransport => {
           connection = webSocketTransport;
-          simpleContentProvider = new SimpleTextDocumentContentProvider();
+          connectionWrapper = new ConnectionWrapper(connection);
+
+          context.subscriptions.push(connectionWrapper);
+          context.subscriptions.push({dispose() {connection.close()}});
+
+          simpleContentProvider = new SimpleTextDocumentContentProvider(connectionWrapper);
           context.subscriptions.push(
             vscode.workspace.registerTextDocumentContentProvider(
               'nuclide',
@@ -56,18 +63,18 @@ function onDidWebSocketServerStartListening(server, context) {
           ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
         });
       } else if (command === 'remote-file-search-query') {
-        invariant(connection);
-        // TODO(mbolin): Perform the search for the query.
-        // Use connection.send(msg) to do the query.
         const {query} = params;
-        console.log(`Query for ${query}`);
-        ws.send(JSON.stringify({
-          command: 'remote-file-search-results',
-          query,
-          results: ['foo', 'bar', 'baz'],
-        }));
+        console.info(`${command} for ${query}`);
+        connectionWrapper.makeRpc('do-file-search', {query}).then(
+          response => {
+            ws.send(JSON.stringify({
+              command: 'remote-file-search-results',
+              query,
+              results: response.results,
+            }));
+          }
+        );
       } else if (command === 'remote-file-search-open') {
-        invariant(connection);
         const {file} = params;
         const address = connection.getAddress();
         const remotePath = `${searchDirectory}/${file}`;
@@ -82,9 +89,8 @@ function onDidWebSocketServerStartListening(server, context) {
   });
 
   const textDocumentContentProvider = {
-    // TODO(mbolin): How does this know to render this as HTML?
-    // Is it because "html" is in the scheme name ("vs-code-html-preview")?
-    // Or is this always HTML?
+    // Note that this is rendered as HTML because it is used with the
+    // `vscode.previewHtml` command.
     provideTextDocumentContent(uri/*: vscode.Uri*/)/*: string*/ {
       return `
 <!doctype html>
@@ -147,6 +153,5 @@ function activate(context) {
 exports.activate = activate;
 
 // this method is called when your extension is deactivated
-function deactivate() {
-}
+function deactivate() {}
 exports.deactivate = deactivate;
