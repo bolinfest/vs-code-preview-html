@@ -1,8 +1,7 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-var vscode = require('vscode');
-var {Server: WebSocketServer} = require('ws');
-var {createConnection} = require('./connection');
+const invariant = require('assert');
+const vscode = require('vscode');
+const {Server: WebSocketServer} = require('ws');
+const {createConnection} = require('./connection');
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
@@ -16,39 +15,64 @@ function onDidWebSocketServerStartListening(server, context) {
 
     // Note that message is always a string, never a Buffer.
     ws.on('message', message => {
-      if (typeof message === 'string') {
-        const params = JSON.parse(message);
-        console.info(`Message received in Extension Host: ${JSON.stringify(message, null, 2)}`);
-        const {command} = params;
-        if (command === 'initialized?') {
-          ws.send(JSON.stringify({command: 'initialized.'}));
-        } else if (command === 'connect') {
-          const {host, privateKey, serverCommand} = params;
-          const pathToPrivateKey = privateKey.startsWith('~')
-            ? privateKey.replace('~', process.env.HOME)
-            : privateKey;
-
-          const username = process.env.USER;
-          createConnection(
-            username,
-            host,
-            pathToPrivateKey,
-            serverCommand,
-            ws
-          ).then(webSocketTransport => {
-            connection = webSocketTransport;
-            ws.send(JSON.stringify({command: 'remote-connection-established'}));
-          }).catch(error => {
-            ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
-          });
-        }
-      } else {
+      if (typeof message !== 'string') {
         console.error(`Unhandled message type: ${typeof message}`);
+      }
+
+      const params = JSON.parse(message);
+      console.info(`Message received in Extension Host: ${JSON.stringify(message, null, 2)}`);
+      const {command} = params;
+      if (command === 'initialized?') {
+        ws.send(JSON.stringify({command: 'initialized.'}));
+      } else if (command === 'connect') {
+        const {host, privateKey, serverCommand} = params;
+        const pathToPrivateKey = privateKey.startsWith('~')
+          ? privateKey.replace('~', process.env.HOME)
+          : privateKey;
+
+        const username = process.env.USER;
+        createConnection(
+          username,
+          host,
+          pathToPrivateKey,
+          serverCommand,
+          ws
+        ).then(webSocketTransport => {
+          connection = webSocketTransport;
+          ws.send(JSON.stringify({command: 'remote-connection-established'}));
+        }).catch(error => {
+          ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
+        });
+      } else if (command === 'remote-file-search-query') {
+        invariant(connection);
+        // TODO(mbolin): Perform the search for the query.
+        // Use connection.send(msg) to do the query.
+        const {query} = params;
+        console.log(`Query for ${query}`);
+        ws.send(JSON.stringify({
+          command: 'remote-file-search-results',
+          query,
+          results: ['foo', 'bar', 'baz'],
+        }));
+      } else if (command === 'remote-file-search-open') {
+        invariant(connection);
+        const {file} = params;
+        // TODO(mbolin): Get the name/URI of the file to open.
+        // Use connection.send(msg) to get the file contents.
+        // Turn the URI into a Nuclide URI and then make sure the
+        // TextDocumentContentProvider we created is able to respond to
+        // the request.
+        console.log(`Trying to open ${file}`);
+      } else {
+        console.error(`Unhandled command: ${command}`);
       }
     });
   });
 
-  var textDocumentContentProvider = {
+  const textDocumentContentProvider = {
+    // TODO(mbolin): How does this know to render this as HTML?
+    // Is it because "html" is in the scheme name ("vs-code-html-preview")?
+    // Or is this always HTML?
     provideTextDocumentContent(uri/*: vscode.Uri*/)/*: string*/ {
       return `
 <!doctype html>

@@ -1,7 +1,7 @@
 {
     "parser": "babel-eslint",
     "env": {
-        "browser": false,
+        "browser": true,
         "commonjs": true,
         "es6": true,
         "node": true
@@ -21,7 +21,8 @@
         "constructor-super": "warn",
         "valid-typeof": "warn",
 
-        "react/jsx-uses-react": 1
+        "react/jsx-uses-react": 1,
+        "react/jsx-uses-vars": 1
     },
     "plugins": [
         "eslint-plugin-flowtype",

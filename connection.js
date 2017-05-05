@@ -16,8 +16,12 @@ function createConnection(username, host, pathToPrivateKey, remoteServerCommand,
         finish
       ) {
         invariant(prompts.length > 0);
-        const {prompt, echo} = prompts[0];
-        // TODO(mbolin): Use ws for prompt.
+        // TODO(mbolin): Need to listen for responses to prompts. Should be
+        // received as an array of strings and passed to finish().
+        ws.send(JSON.stringify({
+          command: 'prompt',
+          prompts,
+        }));
       },
 
       onWillConnect() {},

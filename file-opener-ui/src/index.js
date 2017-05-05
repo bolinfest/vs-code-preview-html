@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ConnectionDialog from './ConnectionDialog';
+import ConnectionFailed from './ConnectionFailed';
 import ConnectingSpinner from './ConnectingSpinner';
 import FileSearch from './FileSearch';
+import KeyboardInteractive from './KeyboardInteractive';
 import './index.css';
 
 
@@ -26,6 +28,29 @@ function showConnecting() {
   ReactDOM.render(<ConnectingSpinner />, rootElement);
 }
 
+let lastQuery = '';
+
+function showFileSearch(ws: WebSocket, results: Array<string> = null) {
+  const props = {
+    query: lastQuery,
+    results: results || [],
+    doQuery(query: string) {
+      lastQuery = query;
+      ws.send(JSON.stringify({
+        command: 'remote-file-search-query',
+        query,
+      }));
+    },
+    openFile(file: string) {
+      ws.send(JSON.stringify({
+        command: 'remote-file-search-open',
+        file,
+      }))
+    },
+  };
+  ReactDOM.render(<FileSearch {...props} />, rootElement);
+}
+
 function main(webSocketPort: number) {
   const ws = new WebSocket(`ws://localhost:${webSocketPort}`);
   ws.onopen = function() {
@@ -35,11 +60,16 @@ function main(webSocketPort: number) {
       if (command === 'initialized.') {
         showConnectionDialog(ws);
       } else if (command === 'prompt') {
-        // TODO(mbolin): Handle onKeyboardInteractive() here.
+        ReactDOM.render(<KeyboardInteractive prompts={params.prompts} />, rootElement);
       } else if (command === 'remote-connection-established') {
-        ReactDOM.render(<FileSearch />, rootElement);
+        showFileSearch(ws);
       } else if (command === 'remote-connection-failed') {
-
+        ReactDOM.render(<ConnectionFailed />, rootElement);
+      } else if (command === 'remote-file-search-results') {
+        const {query, results} = params;
+        if (query === lastQuery) {
+          showFileSearch(ws, results);
+        }
       }
     };
     ws.send(JSON.stringify({command: 'initialized?'}));
