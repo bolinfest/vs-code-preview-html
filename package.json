@@ -1,38 +1,43 @@
 {
-    "name": "vs-code-preview-html",
-    "displayName": "vs-code-preview-html",
-    "description": "Kicking the tires",
-    "version": "0.0.1",
-    "publisher": "mbolin-at-fb-dot-com",
-    "engines": {
-        "vscode": "^1.5.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "onCommand:extension.testPreviewHtmlCommunication"
-    ],
-    "main": "./extension",
-    "contributes": {
-        "commands": [{
-            "command": "extension.testPreviewHtmlCommunication",
-            "title": "Test vscode.previewHtml() communication"
-        }]
-    },
-    "scripts": {
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test"
-    },
-    "dependencies": {
-        "ws": "1.1.1"
-    },
-    "devDependencies": {
-        "typescript": "^2.0.3",
-        "vscode": "^1.0.0",
-        "mocha": "^2.3.3",
-        "eslint": "^3.6.0",
-        "@types/node": "^6.0.40",
-        "@types/mocha": "^2.2.32"
-    }
+  "name": "vs-code-preview-html",
+  "displayName": "vs-code-preview-html",
+  "description": "Kicking the tires",
+  "version": "0.0.1",
+  "publisher": "mbolin-at-fb-dot-com",
+  "engines": {
+    "vscode": "^1.5.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.testPreviewHtmlCommunication"
+  ],
+  "main": "./extension",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.testPreviewHtmlCommunication",
+        "title": "Test vscode.previewHtml() communication"
+      }
+    ]
+  },
+  "scripts": {
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "node ./node_modules/vscode/bin/test"
+  },
+  "dependencies": {
+    "ws": "1.1.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.0.40",
+    "babel-eslint": "^7.2.3",
+    "eslint": "^3.6.0",
+    "eslint-plugin-flowtype": "2.30.0",
+    "eslint-plugin-react": "6.8.0",
+    "mocha": "^2.3.3",
+    "typescript": "^2.0.3",
+    "vscode": "^1.0.0"
+  }
 }

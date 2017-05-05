@@ -1,0 +1,9 @@
+body {
+  background-color: #000;
+  color: rgb(231, 231, 231);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "HelveticaNeue-Light", Ubuntu, "Droid Sans", sans-serif;
+  font-size: 13px;
+  line-height: 18.2px;
+  margin: 0;
+  padding: 0;
+}

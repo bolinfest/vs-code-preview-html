@@ -54,36 +54,15 @@ function onDidWebSocketServerStartListening(server, context) {
 <!doctype html>
 <html>
 <head>
-  <style>
-  .fakelink {
-    cursor: pointer;
-    text-decoration: underline;
-  }
-  </style>
+  <link rel="STYLESHEET" type="text/css" href="file://${context.asAbsolutePath('file-opener-ui/build/out.css')}">
 </head>
 <body>
+  <div id="root"></div>
   <script>var WS_PORT = ${port};</script>
-  <script src="file://${context.asAbsolutePath('example.js')}"></script>
-  <div id="contents">
-    <div>Connect to a remote server</div>
-    <form onsubmit="tryToConnect()">
-      <div>
-        Host: <input id="connect-host" value="localhost" size="75">
-      </div>
-      <div>
-        Private Key: <input id="connect-private-key" value="~/.ssh/test_id_rsa" size="75">
-      </div>
-      <div>
-        Remote Server Command: <input id="connect-server-command" value="/usr/local/bin/node /Users/mbolin/fbsource/fbobjc/Tools/Nuclide/modules/nuclide-proxy/src/server/cli-entry.js" size="75">
-      </div>
-      <div>
-        <input type="submit" id="connect-submit" value="Connect" disabled>
-      </div>
-    </form>
-  </div>
+  <script src="file://${context.asAbsolutePath('file-opener-ui/build/out.js')}"></script>
 </body>
 </html>
-      `;
+      `
     },
   };
   context.subscriptions.push(

@@ -1,0 +1,41 @@
+/* TODO(mbolin): flexbox */
+
+.connection-dialog-root {
+  width: 400px;
+}
+
+input {
+  width: 100%;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+
+.connection-dialog {
+  display: table;
+  width: 400px;
+}
+
+.connection-dialog-row {
+  display: table-row;
+}
+
+.connection-dialog-cell {
+  display: table-cell;
+  padding: 2px;
+}
+
+.connection-dialog-submit-button-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.connection-dialog-submit-button {
+  background-color: black;
+  border: 1px solid rgba(231, 231, 231, 0.498039);
+  color: rgba(231, 231, 231, 0.498039);
+  padding: 8px;
+}
+
+.connection-dialog-submit-button:hover {
+  background-color: rgba(231, 231, 231, 0.498039);
+  cursor: pointer;
+}

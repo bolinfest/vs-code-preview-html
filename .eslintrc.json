@@ -1,4 +1,5 @@
 {
+    "parser": "babel-eslint",
     "env": {
         "browser": false,
         "commonjs": true,
@@ -18,6 +19,12 @@
         "no-unreachable": "warn",
         "no-unused-vars": "warn",
         "constructor-super": "warn",
-        "valid-typeof": "warn"
-    }
+        "valid-typeof": "warn",
+
+        "react/jsx-uses-react": 1
+    },
+    "plugins": [
+        "eslint-plugin-flowtype",
+        "eslint-plugin-react"
+    ]
 }
