@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 var vscode = require('vscode');
 var {Server: WebSocketServer} = require('ws');
+var {createConnection} = require('./connection');
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
@@ -10,11 +11,37 @@ function onDidWebSocketServerStartListening(server, context) {
   var {port} = server._server.address();
 
   server.on('connection', ws => {
+    // This is a WebSocketTransport from nuclide-proxy.
+    var connection = null;
+
     // Note that message is always a string, never a Buffer.
     ws.on('message', message => {
       if (typeof message === 'string') {
-        console.log(`Message received in Extension Host: ${message}`);
-        ws.send('Roger that.');
+        const params = JSON.parse(message);
+        console.info(`Message received in Extension Host: ${JSON.stringify(message, null, 2)}`);
+        const {command} = params;
+        if (command === 'initialized?') {
+          ws.send(JSON.stringify({command: 'initialized.'}));
+        } else if (command === 'connect') {
+          const {host, privateKey, serverCommand} = params;
+          const pathToPrivateKey = privateKey.startsWith('~')
+            ? privateKey.replace('~', process.env.HOME)
+            : privateKey;
+
+          const username = process.env.USER;
+          createConnection(
+            username,
+            host,
+            pathToPrivateKey,
+            serverCommand,
+            ws
+          ).then(webSocketTransport => {
+            connection = webSocketTransport;
+            ws.send(JSON.stringify({command: 'remote-connection-established'}));
+          }).catch(error => {
+            ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
+          });
+        }
       } else {
         console.error(`Unhandled message type: ${typeof message}`);
       }
@@ -35,15 +62,25 @@ function onDidWebSocketServerStartListening(server, context) {
   </style>
 </head>
 <body>
-  Mouseover the red square to verify inline event handlers work:
-  <div style="background-color: red; width: 100px; height: 100px" onmouseover="console.log('in')"></div>
-  <a href="command:workbench.action.showCommands">Show command palette (this is an anchor with a <code>command:</code> href</a>
-  <p>
-  <span id="fakelink" class="fakelink">This uses a hack to invoke a VS Code command.</span>
-  <p>
-  <span id="fetch" class="fakelink">try calling <code>fetch()</code> (see console)</span>
   <script>var WS_PORT = ${port};</script>
   <script src="file://${context.asAbsolutePath('example.js')}"></script>
+  <div id="contents">
+    <div>Connect to a remote server</div>
+    <form onsubmit="tryToConnect()">
+      <div>
+        Host: <input id="connect-host" value="localhost" size="75">
+      </div>
+      <div>
+        Private Key: <input id="connect-private-key" value="~/.ssh/test_id_rsa" size="75">
+      </div>
+      <div>
+        Remote Server Command: <input id="connect-server-command" value="/usr/local/bin/node /Users/mbolin/fbsource/fbobjc/Tools/Nuclide/modules/nuclide-proxy/src/server/cli-entry.js" size="75">
+      </div>
+      <div>
+        <input type="submit" id="connect-submit" value="Connect" disabled>
+      </div>
+    </form>
+  </div>
 </body>
 </html>
       `;

@@ -1,36 +1,31 @@
-function runCommand(command) {
-  var anchor = document.createElement('a');
-  anchor.href = `command:${command}`;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  console.log(`tried to run '${command}'`);
+function $(id) {
+  return document.getElementById(id);
 }
-
-document.getElementById('fakelink')
-  .addEventListener('click', () => runCommand('workbench.action.showCommands'), false);
-
-function tryFetch() {
-  var url = 'https://www.google.com';
-  fetch(url)
-    .then(response => {
-      console.log(`is ok? ${response.ok}`);
-      // This works as expected, but it muddies the console, so we disable it
-      // for now.
-      // response.text().then(
-      //   text => console.log(`Text of ${url} is: ${text}`),
-      //   error => console.error(`Failed to get text() of ${url}: ${error}`)
-      // );
-    });
-}
-
-document.getElementById('fetch')
-  .addEventListener('click', tryFetch, false);
 
 var ws = new WebSocket(`ws://localhost:${WS_PORT}`);
 ws.onopen = function() {
   ws.onmessage = function(message) {
-    console.log(`Message received in Embedded Pane: ${message.data}`);
+    const params = JSON.parse(message.data);
+    const {command} = params;
+    if (command === 'initialized.') {
+      $('connect-submit').disabled = false;
+    } else if (command === 'prompt') {
+      // TODO(mbolin): Handle onKeyboardInteractive() here.
+    } else if (command === 'remote-connection-established') {
+      document.body.innerText = 'Connected!';
+    } else if (command === 'remote-connection-failed') {
+      document.body.innerText = 'FAILED: ' + params.error;
+    }
   };
-  ws.send('I have a message for you!');
+  ws.send(JSON.stringify({command: 'initialized?'}));
 };
+
+function tryToConnect() {
+  const message = {
+    command: 'connect',
+    host: $('connect-host').value,
+    privateKey: $('connect-private-key').value,
+    serverCommand: $('connect-server-command').value,
+  };
+  ws.send(JSON.stringify(message));
+}
