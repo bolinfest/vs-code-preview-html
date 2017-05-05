@@ -29,7 +29,7 @@ export default class FileSearch extends Component {
     const children = this.props.results.map(result => {
       return (
         <div>
-          <span className="file-search-query-result" onClick={e => this._open(result)}>{result}</span>
+          <span className="file-search-query-result" onClick={() => this._open(result)}>{result}</span>
         </div>
       )
     });
@@ -37,7 +37,7 @@ export default class FileSearch extends Component {
     return (
       <div>
         <div>
-          Search: <input value={this.state.query} onChange={e => this._onChange(e)} />
+          Search: <input value={this.state.query} onChange={this._onChange} />
         </div>
         <div>
           {children}

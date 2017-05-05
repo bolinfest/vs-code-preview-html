@@ -2,16 +2,21 @@ const invariant = require('assert');
 const vscode = require('vscode');
 const {Server: WebSocketServer} = require('ws');
 const {createConnection} = require('./connection');
+const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContentProvider');
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
+// TODO(mbolin): Make this configurable via the connection dialog.
+const searchDirectory = '/data/users/mbolin/fbsource';
+
 function onDidWebSocketServerStartListening(server, context) {
   // It would be better to find a sanctioned way to get the port.
-  var {port} = server._server.address();
+  const {port} = server._server.address();
 
   server.on('connection', ws => {
     // This is a WebSocketTransport from nuclide-proxy.
-    var connection = null;
+    let connection = null;
+    let simpleContentProvider;
 
     // Note that message is always a string, never a Buffer.
     ws.on('message', message => {
@@ -39,6 +44,13 @@ function onDidWebSocketServerStartListening(server, context) {
           ws
         ).then(webSocketTransport => {
           connection = webSocketTransport;
+          simpleContentProvider = new SimpleTextDocumentContentProvider();
+          context.subscriptions.push(
+            vscode.workspace.registerTextDocumentContentProvider(
+              'nuclide',
+              simpleContentProvider)
+          );
+
           ws.send(JSON.stringify({command: 'remote-connection-established'}));
         }).catch(error => {
           ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
@@ -57,12 +69,12 @@ function onDidWebSocketServerStartListening(server, context) {
       } else if (command === 'remote-file-search-open') {
         invariant(connection);
         const {file} = params;
-        // TODO(mbolin): Get the name/URI of the file to open.
-        // Use connection.send(msg) to get the file contents.
-        // Turn the URI into a Nuclide URI and then make sure the
-        // TextDocumentContentProvider we created is able to respond to
-        // the request.
-        console.log(`Trying to open ${file}`);
+        const address = connection.getAddress();
+        const remotePath = `${searchDirectory}/${file}`;
+        const uri = `${address.replace(/^wss?:/, 'nuclide:')}${remotePath}`;
+        vscode.workspace.openTextDocument(vscode.Uri.parse(uri)).then(
+          textDocument => vscode.window.showTextDocument(textDocument),
+          error => console.error(`Failed to open text document for uri '${uri}'`, error));
       } else {
         console.error(`Unhandled command: ${command}`);
       }
