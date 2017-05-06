@@ -41,10 +41,8 @@ function createConnection(username, host, pathToPrivateKey, remoteServerCommand,
       username,
       pathToPrivateKey,
       authMethod: 'PRIVATE_KEY',
-      cwd: 'This is currently unused',
       remoteServerCommand,
       password: '', // Should probably be nullable because of the authMethod.
-      displayTitle: 'used when serializing the connection',
     });
   });  
 }
