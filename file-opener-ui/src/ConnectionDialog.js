@@ -20,7 +20,7 @@ export default class ConnectionDialog extends Component {
   static defaultProps = {
     host: 'localhost',
     privateKey: '~/.ssh/test_id_rsa',
-    serverCommand: '/usr/local/bin/node /Users/mbolin/fbsource/fbobjc/Tools/Nuclide/modules/nuclide-proxy/src/server/cli-entry.js',
+    serverCommand: '/usr/local/bin/node /Users/mbolin/fbsource/fbobjc/Tools/Nuclide/modules/nuclide-proxy/src/fb-filesearch/main-entry.js',
   };
 
   props: PropsType;

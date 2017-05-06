@@ -25,14 +25,6 @@ class ConnectionWrapper {
    * This is for an RPC that expects a response.
    */
   makeRpc(method /*: string */, params /*: Object*/) /*: Promise */ {
-    // if (method === 'do-file-search') {
-    //   return Promise.resolve({results: ['aaa', 'bbb', 'ccc']});
-    // } else if (method === 'get-file-contents') {
-    //   return Promise.resolve({contents: 'Hooray for file contents!'});
-    // } else {
-    //   throw Error(`Unknown method: ${method}`);
-    // }
-
     const id = (this._nextId++).toString(16);
     const promise = new Promise((resolve, reject) => {
       this._emitter.once(id, response => {
