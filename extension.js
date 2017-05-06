@@ -8,7 +8,7 @@ const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContent
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
 // TODO(mbolin): Make this configurable via the connection dialog.
-const searchDirectory = '/data/users/mbolin/fbsource';
+const searchDirectory = '/Users/mbolin/fbsource';
 
 function onDidWebSocketServerStartListening(server, context) {
   // It would be better to find a sanctioned way to get the port.

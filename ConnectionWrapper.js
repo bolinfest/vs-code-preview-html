@@ -8,7 +8,8 @@ class ConnectionWrapper {
     
     const observable = connection.onMessage();
     observable.subscribe({
-      next(value) {
+      // Must use arrow function so that `this` is bound correctly.
+      next: (value) => {
         const response = JSON.parse(value);
         this._emitter.emit(response.id, response);
       },
@@ -28,7 +29,7 @@ class ConnectionWrapper {
     const id = (this._nextId++).toString(16);
     const promise = new Promise((resolve, reject) => {
       this._emitter.once(id, response => {
-        if (response.error != null) {
+        if (response.error == null) {
           resolve(response.result);
         } else {
           reject(response.error);
