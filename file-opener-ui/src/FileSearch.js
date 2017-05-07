@@ -38,7 +38,7 @@ export default class FileSearch extends Component {
     return (
       <div>
         <div>
-          Search {this.props.searchDirectory}: <input value={this.state.query} onChange={this._onChange} />
+          Search {this.props.searchDirectory}: <input value={this.state.query} onChange={this._onChange} autoFocus={true} />
         </div>
         <div>
           {children}

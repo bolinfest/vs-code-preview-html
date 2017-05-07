@@ -48,6 +48,8 @@ export default class ConnectionDialog extends Component {
   }
 
   render() {
+    // Note that we autofocus the first input, though we should really autofocus
+    // the first empty input, or the submit button if all inputs are non-empty.
     return (
       <div className="connection-dialog-root">
         <form onSubmit={this._onSubmit}>
@@ -55,7 +57,7 @@ export default class ConnectionDialog extends Component {
             <div className="connection-dialog-row">
               <div className="connection-dialog-cell">Host:</div>
               <div className="connection-dialog-cell">
-                <input value={this.state.host} onChange={e => this.setState({host: e.target.value})} />
+                <input value={this.state.host} onChange={e => this.setState({host: e.target.value})} autoFocus={true} />
               </div>
             </div>
             <div className="connection-dialog-row">
