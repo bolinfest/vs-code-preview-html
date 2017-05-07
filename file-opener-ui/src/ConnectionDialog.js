@@ -20,10 +20,10 @@ type StateType = {
 
 export default class ConnectionDialog extends Component {
   static defaultProps = {
-    host: 'localhost',
-    privateKey: '~/.ssh/test_id_rsa',
-    serverCommand: '/usr/local/bin/node /Users/mbolin/fbsource/fbobjc/Tools/Nuclide/modules/nuclide-proxy/src/fb-filesearch/main-entry.js',
-    searchDirectory: '/Users/mbolin/fbsource',
+    host: '',
+    privateKey: '',
+    serverCommand: '',
+    searchDirectory: '',
   };
 
   props: PropsType;

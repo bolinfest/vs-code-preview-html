@@ -61,7 +61,13 @@ function main(webSocketPort: number) {
       if (command === 'initialized.') {
         showConnectionDialog(ws);
       } else if (command === 'prompt') {
-        ReactDOM.render(<KeyboardInteractive prompts={params.prompts} />, rootElement);
+        const finish = (responses: Array<string>) => {
+          ws.send(JSON.stringify({
+            command: 'keyboard-interactive-responses',
+            responses,
+          }));
+        };
+        ReactDOM.render(<KeyboardInteractive prompts={params.prompts} finish={finish} />, rootElement);
       } else if (command === 'remote-connection-established') {
         showFileSearch(ws);
       } else if (command === 'remote-connection-failed') {

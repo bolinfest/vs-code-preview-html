@@ -22,6 +22,7 @@ function onDidWebSocketServerStartListening(server, context) {
     ws.on('message', message => {
       if (typeof message !== 'string') {
         console.error(`Unhandled message type: ${typeof message}`);
+        return;
       }
 
       const params = JSON.parse(message);

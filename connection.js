@@ -7,6 +7,12 @@ var invariant = require('assert');
  */
 function createConnection(username, host, pathToPrivateKey, remoteServerCommand, ws, searchDirectory) {
   return new Promise((resolve, reject) => {
+    let lastFinishCallback;
+
+    function onFinish(responses) {
+      lastFinishCallback(responses);
+    }
+
     const sshHandshake = new SshHandshake({
       onKeyboardInteractive(
         name,
@@ -16,8 +22,21 @@ function createConnection(username, host, pathToPrivateKey, remoteServerCommand,
         finish
       ) {
         invariant(prompts.length > 0);
-        // TODO(mbolin): Need to listen for responses to prompts. Should be
-        // received as an array of strings and passed to finish().
+        lastFinishCallback = finish;
+
+        // TODO: Remove this listener, when appropriate.
+        ws.on('message', message => {
+          if (typeof message !== 'string') {
+            console.error(`Unhandled message type: ${typeof message}`);
+            return;
+          }
+
+          const params = JSON.parse(message);
+          if (params.command === 'keyboard-interactive-responses') {
+            lastFinishCallback(params.responses);
+          }
+        });
+
         ws.send(JSON.stringify({
           command: 'prompt',
           prompts,
