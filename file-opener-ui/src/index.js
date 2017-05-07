@@ -11,12 +11,13 @@ import './index.css';
 const rootElement = document.getElementById('root');
 
 function showConnectionDialog(ws: WebSocket) {
-  function onConnect(host, privateKey, serverCommand) {
+  function onConnect(host, privateKey, serverCommand, searchDirectory) {
     const message = {
       command: 'connect',
       host,
       privateKey,
       serverCommand,
+      searchDirectory,
     };
     ws.send(JSON.stringify(message));
     showConnecting();

@@ -7,13 +7,15 @@ type PropsType = {
   host: string,
   privateKey: string,
   serverCommand: string,
-  onConnect: (host: string, privateKey: string, serverCommand: string) => void,
+  searchDirectory: string,
+  onConnect(host: string, privateKey: string, serverCommand: string, searchDirectory: string): void,
 };
 
 type StateType = {
   host: string,
   privateKey: string,
   serverCommand: string,
+  searchDirectory: string,
 };
 
 export default class ConnectionDialog extends Component {
@@ -21,6 +23,7 @@ export default class ConnectionDialog extends Component {
     host: 'localhost',
     privateKey: '~/.ssh/test_id_rsa',
     serverCommand: '/usr/local/bin/node /Users/mbolin/fbsource/fbobjc/Tools/Nuclide/modules/nuclide-proxy/src/fb-filesearch/main-entry.js',
+    searchDirectory: '/Users/mbolin/fbsource',
   };
 
   props: PropsType;
@@ -33,6 +36,7 @@ export default class ConnectionDialog extends Component {
       host: props.host,
       privateKey: props.privateKey,
       serverCommand: props.serverCommand,
+      searchDirectory: props.searchDirectory,
     };
   }
 
@@ -59,6 +63,12 @@ export default class ConnectionDialog extends Component {
                 <input value={this.state.serverCommand} onChange={e => this.setState({serverCommand: e.target.value})} />
               </div>
             </div>
+            <div className="connection-dialog-row">
+              <div className="connection-dialog-cell">Search Directory:</div>
+              <div className="connection-dialog-cell">
+                <input value={this.state.searchDirectory} onChange={e => this.setState({searchDirectory: e.target.value})} />
+              </div>
+            </div>
           </div>
           <div className="connection-dialog-submit-button-container">
             <button className="connection-dialog-submit-button" type="submit">CONNECT</button>
@@ -69,7 +79,7 @@ export default class ConnectionDialog extends Component {
   }
 
   _onSubmit(event: Event) {
-    this.props.onConnect(this.state.host, this.state.privateKey, this.state.serverCommand);
+    this.props.onConnect(this.state.host, this.state.privateKey, this.state.serverCommand, this.state.searchDirectory);
     event.preventDefault();
   }
 }

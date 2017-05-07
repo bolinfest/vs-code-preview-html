@@ -7,9 +7,6 @@ const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContent
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
-// TODO(mbolin): Make this configurable via the connection dialog.
-const searchDirectory = '/Users/mbolin/fbsource';
-
 function onDidWebSocketServerStartListening(server, context) {
   // It would be better to find a sanctioned way to get the port.
   const {port} = server._server.address();
@@ -19,6 +16,7 @@ function onDidWebSocketServerStartListening(server, context) {
     let connection;
     let connectionWrapper;
     let simpleContentProvider;
+    let searchDirectory;
 
     // Note that message is always a string, never a Buffer.
     ws.on('message', message => {
@@ -32,12 +30,13 @@ function onDidWebSocketServerStartListening(server, context) {
       if (command === 'initialized?') {
         ws.send(JSON.stringify({command: 'initialized.'}));
       } else if (command === 'connect') {
-        const {host, privateKey, serverCommand} = params;
+        const {host, privateKey, serverCommand, searchDirectory: _searchDirectory} = params;
         const pathToPrivateKey = privateKey.startsWith('~')
           ? privateKey.replace('~', process.env.HOME)
           : privateKey;
 
         const username = process.env.USER;
+        searchDirectory = _searchDirectory;
         createConnection(
           username,
           host,
