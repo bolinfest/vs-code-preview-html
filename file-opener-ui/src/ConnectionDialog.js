@@ -37,14 +37,14 @@ export default class ConnectionDialog extends Component {
     const lastState = localStorage.getItem(STORAGE_KEY);
     if (lastState) {
       this.state = JSON.parse(lastState);
-      return;
+    } else {
+      this.state = {
+        host: props.host,
+        privateKey: props.privateKey,
+        serverCommand: props.serverCommand,
+        searchDirectory: props.searchDirectory,
+      };
     }
-    this.state = {
-      host: props.host,
-      privateKey: props.privateKey,
-      serverCommand: props.serverCommand,
-      searchDirectory: props.searchDirectory,
-    };
   }
 
   render() {
