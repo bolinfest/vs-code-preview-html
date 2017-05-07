@@ -43,7 +43,8 @@ function onDidWebSocketServerStartListening(server, context) {
           host,
           pathToPrivateKey,
           serverCommand,
-          ws
+          ws,
+          searchDirectory
         ).then(webSocketTransport => {
           connection = webSocketTransport;
           connectionWrapper = new ConnectionWrapper(connection);

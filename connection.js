@@ -5,7 +5,7 @@ var invariant = require('assert');
  * @param ws is a WebSocket client of the WebSocket server created for a
  *     connection UI.
  */
-function createConnection(username, host, pathToPrivateKey, remoteServerCommand, ws) {
+function createConnection(username, host, pathToPrivateKey, remoteServerCommand, ws, searchDirectory) {
   return new Promise((resolve, reject) => {
     const sshHandshake = new SshHandshake({
       onKeyboardInteractive(
@@ -42,6 +42,9 @@ function createConnection(username, host, pathToPrivateKey, remoteServerCommand,
       pathToPrivateKey,
       authMethod: 'PRIVATE_KEY',
       remoteServerCommand,
+      remoteServerCustomParams: {
+        searchDirectory,
+      },
       password: '', // Should probably be nullable because of the authMethod.
     });
   });  
