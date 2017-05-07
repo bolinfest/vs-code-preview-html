@@ -18,6 +18,8 @@ type StateType = {
   searchDirectory: string,
 };
 
+const STORAGE_KEY = 'nuclide-proxy.lastConnection';
+
 export default class ConnectionDialog extends Component {
   static defaultProps = {
     host: '',
@@ -32,6 +34,11 @@ export default class ConnectionDialog extends Component {
   constructor(props: PropsType) {
     super(props);
     (this: any)._onSubmit = this._onSubmit.bind(this);
+    const lastState = localStorage.getItem(STORAGE_KEY);
+    if (lastState) {
+      this.state = JSON.parse(lastState);
+      return;
+    }
     this.state = {
       host: props.host,
       privateKey: props.privateKey,
@@ -79,6 +86,7 @@ export default class ConnectionDialog extends Component {
   }
 
   _onSubmit(event: Event) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
     this.props.onConnect(this.state.host, this.state.privateKey, this.state.serverCommand, this.state.searchDirectory);
     event.preventDefault();
   }

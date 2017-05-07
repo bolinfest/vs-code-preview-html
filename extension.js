@@ -73,6 +73,9 @@ function onDidWebSocketServerStartListening(server, context) {
               query,
               results: response.results,
             }));
+          },
+          error => {
+            console.error(error);
           }
         );
       } else if (command === 'remote-file-search-open') {
@@ -130,7 +133,7 @@ function activate(context) {
 
     context.subscriptions.push(
       new vscode.Disposable(() => {
-        server.close();      
+        server.close();
       })
     );
 
