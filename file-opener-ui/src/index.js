@@ -30,10 +30,12 @@ function showConnecting() {
 }
 
 let lastQuery = '';
+let searchDirectory = '';
 
 function showFileSearch(ws: WebSocket, results: Array<string> = null) {
   const props = {
     query: lastQuery,
+    searchDirectory,
     results: results || [],
     doQuery(query: string) {
       lastQuery = query;
@@ -69,6 +71,7 @@ function main(webSocketPort: number) {
         };
         ReactDOM.render(<KeyboardInteractive prompts={params.prompts} finish={finish} />, rootElement);
       } else if (command === 'remote-connection-established') {
+        searchDirectory = params.searchDirectory;
         showFileSearch(ws);
       } else if (command === 'remote-connection-failed') {
         ReactDOM.render(<ConnectionFailed />, rootElement);

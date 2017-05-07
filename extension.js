@@ -59,7 +59,10 @@ function onDidWebSocketServerStartListening(server, context) {
               simpleContentProvider)
           );
 
-          ws.send(JSON.stringify({command: 'remote-connection-established'}));
+          ws.send(JSON.stringify({
+            command: 'remote-connection-established',
+            searchDirectory,
+          }));
         }).catch(error => {
           ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
         });
@@ -84,7 +87,7 @@ function onDidWebSocketServerStartListening(server, context) {
         const remotePath = `${searchDirectory}/${file}`;
         const uri = `${address.replace(/^wss?:/, 'nuclide:')}${remotePath}`;
         vscode.workspace.openTextDocument(vscode.Uri.parse(uri)).then(
-          textDocument => vscode.window.showTextDocument(textDocument),
+          textDocument => vscode.window.showTextDocument(textDocument, vscode.ViewColumn.Two, /* preserveFocus */ true),
           error => console.error(`Failed to open text document for uri '${uri}'`, error));
       } else {
         console.error(`Unhandled command: ${command}`);
@@ -145,7 +148,7 @@ function activate(context) {
         vscode.commands.executeCommand(
           'vscode.previewHtml',
           previewUri,
-          vscode.ViewColumn.Two,
+          vscode.ViewColumn.One,
           'My Window'
         ).then(null, error => console.error(error));
       });

@@ -3,6 +3,7 @@ import './FileSearch.css';
 
 type PropsType = {
   query: string,
+  searchDirectory: string,
   results: Array<string>,
   doQuery: (query: string) => void,
   openFile: (result: string) => void,
@@ -37,7 +38,7 @@ export default class FileSearch extends Component {
     return (
       <div>
         <div>
-          Search: <input value={this.state.query} onChange={this._onChange} />
+          Search {this.props.searchDirectory}: <input value={this.state.query} onChange={this._onChange} />
         </div>
         <div>
           {children}
