@@ -61,7 +61,12 @@ function main(webSocketPort: number) {
       const params = JSON.parse(message.data);
       const {command} = params;
       if (command === 'initialized.') {
-        showConnectionDialog(ws);
+        if (params.searchDirectory == null) {
+          showConnectionDialog(ws);
+        } else {
+          searchDirectory = params.searchDirectory;
+          showFileSearch(ws);
+        }
       } else if (command === 'prompt') {
         const finish = (responses: Array<string>) => {
           ws.send(JSON.stringify({

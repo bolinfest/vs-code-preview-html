@@ -7,17 +7,17 @@ const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContent
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
+// This is a WebSocketTransport from nuclide-proxy.
+let connection;
+let connectionWrapper;
+let simpleContentProvider;
+let searchDirectory = null;
+
 function onDidWebSocketServerStartListening(server, context) {
   // It would be better to find a sanctioned way to get the port.
   const {port} = server._server.address();
 
   server.on('connection', ws => {
-    // This is a WebSocketTransport from nuclide-proxy.
-    let connection;
-    let connectionWrapper;
-    let simpleContentProvider;
-    let searchDirectory;
-
     // Note that message is always a string, never a Buffer.
     ws.on('message', message => {
       if (typeof message !== 'string') {
@@ -29,7 +29,10 @@ function onDidWebSocketServerStartListening(server, context) {
       console.info(`Message received in Extension Host: ${JSON.stringify(message, null, 2)}`);
       const {command} = params;
       if (command === 'initialized?') {
-        ws.send(JSON.stringify({command: 'initialized.'}));
+        ws.send(JSON.stringify({
+          command: 'initialized.',
+          searchDirectory,
+        }));
       } else if (command === 'connect') {
         const {host, privateKey, serverCommand, searchDirectory: _searchDirectory} = params;
         const pathToPrivateKey = privateKey.startsWith('~')
