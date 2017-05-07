@@ -38,7 +38,7 @@ export default class KeyboardInteractive extends Component {
       <form onSubmit={this._onSubmit}>
         <div>
           <div className="keyboard-interactive-prompt">{prompt.prompt}</div>
-          <input type={inputType} value={this.state.response} onChange={e => this.setState({response: e.target.value})} />
+          <input type={inputType} value={this.state.response} onChange={e => this.setState({response: e.target.value})} autoFocus={true} />
         </div>
         <div className="connection-dialog-submit-button-container">
           <button className="connection-dialog-submit-button" type="submit">SUBMIT</button>
