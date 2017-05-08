@@ -1,7 +1,7 @@
 /* TODO(mbolin): flexbox */
 
 .connection-dialog-root {
-  width: 400px;
+  width: 800px;
 }
 
 input {
@@ -11,7 +11,7 @@ input {
 
 .connection-dialog {
   display: table;
-  width: 400px;
+  width: 800px;
 }
 
 .connection-dialog-row {

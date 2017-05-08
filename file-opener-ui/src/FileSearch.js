@@ -29,16 +29,21 @@ export default class FileSearch extends Component {
   render() {
     const children = this.props.results.map(result => {
       return (
-        <div>
-          <span className="file-search-query-result" onClick={() => this._open(result)}>{result}</span>
+        <div className="file-search-query-result">
+          <span className="file-search-query-result-text" onClick={() => this._open(result)}>{result}</span>
         </div>
       )
     });
 
     return (
-      <div>
+      <div className="file-search-root">
         <div>
-          Search {this.props.searchDirectory}: <input value={this.state.query} onChange={this._onChange} autoFocus={true} />
+          <div className="file-search-title">
+            Search <code>{this.props.searchDirectory}</code>:
+          </div>
+          <div>
+            <input value={this.state.query} onChange={this._onChange} autoFocus={true} />
+          </div>
         </div>
         <div>
           {children}

@@ -1,4 +1,20 @@
+.file-search-root {
+  margin: 10px;
+}
+
+.file-search-title {
+  margin-bottom: 4px;
+}
+
 .file-search-query-result {
+  margin: 4px 0;
+}
+
+.file-search-query-result-text {
   cursor: pointer;
   text-decoration: underline;
+}
+
+.file-search-query-result-text:hover {
+  color: #9cdcfe;
 }
