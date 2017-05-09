@@ -9,17 +9,23 @@ import FileSearch from './FileSearch';
 import KeyboardInteractive from './KeyboardInteractive';
 import './index.css';
 
-
 const rootElement = document.getElementById('root');
 
 function showConnectionDialog(ws: WebSocket) {
-  function onConnect(host, privateKey, serverCommand, searchDirectory) {
+  function onConnect(
+    host,
+    privateKey,
+    serverCommand,
+    searchDirectory,
+    mountDirectory
+  ) {
     const message = {
       command: 'connect',
       host,
       privateKey,
       serverCommand,
       searchDirectory,
+      mountDirectory
     };
     ws.send(JSON.stringify(message));
     showConnecting();
@@ -41,17 +47,21 @@ function showFileSearch(ws: WebSocket, results: Array<string> = []) {
     results,
     doQuery(query: string) {
       lastQuery = query;
-      ws.send(JSON.stringify({
-        command: 'remote-file-search-query',
-        query,
-      }));
+      ws.send(
+        JSON.stringify({
+          command: 'remote-file-search-query',
+          query
+        })
+      );
     },
     openFile(file: string) {
-      ws.send(JSON.stringify({
-        command: 'remote-file-search-open',
-        file,
-      }))
-    },
+      ws.send(
+        JSON.stringify({
+          command: 'remote-file-search-open',
+          file
+        })
+      );
+    }
   };
   ReactDOM.render(<FileSearch {...props} />, rootElement);
 }
@@ -77,12 +87,17 @@ function main(webSocketPort: number) {
         }
       } else if (command === 'prompt') {
         const finish = (responses: Array<string>) => {
-          ws.send(JSON.stringify({
-            command: 'keyboard-interactive-responses',
-            responses,
-          }));
+          ws.send(
+            JSON.stringify({
+              command: 'keyboard-interactive-responses',
+              responses
+            })
+          );
         };
-        ReactDOM.render(<KeyboardInteractive prompts={params.prompts} finish={finish} />, rootElement);
+        ReactDOM.render(
+          <KeyboardInteractive prompts={params.prompts} finish={finish} />,
+          rootElement
+        );
       } else if (command === 'remote-connection-established') {
         searchDirectory = params.searchDirectory;
         showFileSearch(ws);

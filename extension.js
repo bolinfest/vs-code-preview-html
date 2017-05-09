@@ -3,9 +3,14 @@ const vscode = require('vscode');
 const {Server: WebSocketServer} = require('ws');
 const {createConnection} = require('./connection');
 const {ConnectionWrapper} = require('./ConnectionWrapper');
-const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContentProvider');
+const LspProxy = require('./LspProxy');
+const {
+  SimpleTextDocumentContentProvider
+} = require('./SimpleTextDocumentContentProvider');
 
-const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
+const previewUri = vscode.Uri.parse(
+  'vs-code-html-preview://authority/vs-code-html-preview'
+);
 
 // This is a WebSocketTransport from nuclide-proxy.
 let connection;
@@ -29,12 +34,20 @@ function onDidWebSocketServerStartListening(server, context) {
       console.info(`Message received in Extension Host: ${JSON.stringify(message, null, 2)}`);
       const {command} = params;
       if (command === 'initialized?') {
-        ws.send(JSON.stringify({
-          command: 'initialized.',
-          searchDirectory,
-        }));
+        ws.send(
+          JSON.stringify({
+            command: 'initialized.',
+            searchDirectory
+          })
+        );
       } else if (command === 'connect') {
-        const {host, privateKey, serverCommand, searchDirectory: _searchDirectory} = params;
+        const {
+          host,
+          privateKey,
+          serverCommand,
+          searchDirectory: _searchDirectory,
+          mountDirectory
+        } = params;
         const pathToPrivateKey = privateKey.startsWith('~')
           ? privateKey.replace('~', process.env.HOME)
           : privateKey;
@@ -47,38 +60,69 @@ function onDidWebSocketServerStartListening(server, context) {
           pathToPrivateKey,
           serverCommand,
           ws,
-          searchDirectory
-        ).then(webSocketTransport => {
-          connection = webSocketTransport;
-          connectionWrapper = new ConnectionWrapper(connection);
+          searchDirectory,
+          mountDirectory
+        )
+          .then(webSocketTransport => {
+            connection = webSocketTransport;
+            connectionWrapper = new ConnectionWrapper(
+              connection,
+              searchDirectory,
+              mountDirectory
+            );
 
-          context.subscriptions.push(connectionWrapper);
-          context.subscriptions.push({dispose() {connection.close()}});
+            context.subscriptions.push(connectionWrapper);
+            context.subscriptions.push({
+              dispose() {
+                connection.close();
+              }
+            });
 
-          simpleContentProvider = new SimpleTextDocumentContentProvider(connectionWrapper);
-          context.subscriptions.push(
-            vscode.workspace.registerTextDocumentContentProvider(
-              'nuclide',
-              simpleContentProvider)
-          );
+            simpleContentProvider = new SimpleTextDocumentContentProvider(
+              connectionWrapper
+            );
+            context.subscriptions.push(
+              vscode.workspace.registerTextDocumentContentProvider(
+                'nuclide',
+                simpleContentProvider
+              )
+            );
 
-          ws.send(JSON.stringify({
-            command: 'remote-connection-established',
-            searchDirectory,
-          }));
-        }).catch(error => {
-          ws.send(JSON.stringify({command: 'remote-connection-failed', error: String(error)}));
-        });
+            ws.send(
+              JSON.stringify({
+                command: 'remote-connection-established',
+                searchDirectory
+              })
+            );
+
+            context.subscriptions.push(
+              new LspProxy(connectionWrapper, 'php', mountDirectory)
+            );
+            context.subscriptions.push(
+              new LspProxy(connectionWrapper, 'javascript', mountDirectory)
+            );
+          })
+          .catch(error => {
+            console.error(error);
+            ws.send(
+              JSON.stringify({
+                command: 'remote-connection-failed',
+                error: String(error)
+              })
+            );
+          });
       } else if (command === 'remote-file-search-query') {
         const {query} = params;
         console.info(`${command} for ${query}`);
         connectionWrapper.makeRpc('do-file-search', {query}).then(
           response => {
-            ws.send(JSON.stringify({
-              command: 'remote-file-search-results',
-              query,
-              results: response.results,
-            }));
+            ws.send(
+              JSON.stringify({
+                command: 'remote-file-search-results',
+                query,
+                results: response.results
+              })
+            );
           },
           error => {
             console.error(error);
@@ -86,12 +130,22 @@ function onDidWebSocketServerStartListening(server, context) {
         );
       } else if (command === 'remote-file-search-open') {
         const {file} = params;
-        const address = connection.getAddress();
-        const remotePath = `${searchDirectory}/${file}`;
-        const uri = `${address.replace(/^wss?:/, 'nuclide:')}${remotePath}`;
-        vscode.workspace.openTextDocument(vscode.Uri.parse(uri)).then(
-          textDocument => vscode.window.showTextDocument(textDocument, vscode.ViewColumn.Two, /* preserveFocus */ true),
-          error => console.error(`Failed to open text document for uri '${uri}'`, error));
+        const fullPath = `file://${searchDirectory}/${file}`;
+        vscode.workspace
+          .openTextDocument(connectionWrapper.path2Uri(fullPath))
+          .then(
+            textDocument =>
+              vscode.window.showTextDocument(
+                textDocument,
+                vscode.ViewColumn.Two,
+                /* preserveFocus */ true
+              ),
+            error =>
+              console.error(
+                `Failed to open text document for uri '${uri}'`,
+                error
+              )
+          );
       } else {
         console.error(`Unhandled command: ${command}`);
       }
@@ -101,7 +155,7 @@ function onDidWebSocketServerStartListening(server, context) {
   const textDocumentContentProvider = {
     // Note that this is rendered as HTML because it is used with the
     // `vscode.previewHtml` command.
-    provideTextDocumentContent(uri/*: vscode.Uri*/)/*: string*/ {
+    provideTextDocumentContent(uri /*: vscode.Uri*/) /*: string*/ {
       return `
 <!doctype html>
 <html>
@@ -114,18 +168,21 @@ function onDidWebSocketServerStartListening(server, context) {
   <script src="file://${context.asAbsolutePath('file-opener-ui/build/out.js')}"></script>
 </body>
 </html>
-      `
-    },
+      `;
+    }
   };
   context.subscriptions.push(
     vscode.workspace.registerTextDocumentContentProvider(
       'vs-code-html-preview',
-      textDocumentContentProvider)
+      textDocumentContentProvider
+    )
   );
 }
 
 function activate(context) {
-  console.log('Congratulations, your extension "vs-code-preview-html" is now active!');
+  console.log(
+    'Congratulations, your extension "vs-code-preview-html" is now active!'
+  );
 
   var promise = new Promise((resolve, reject) => {
     // Note that one drawback to the current implementation is that no
@@ -146,16 +203,21 @@ function activate(context) {
     // Note that the following code relies on the second argument to
     // registerCommand() being executed asynchronously because `promise` has not
     // been assigned yet.
-    var disposable = vscode.commands.registerCommand('extension.testPreviewHtmlCommunication', function () {
-      promise.then(() => {
-        vscode.commands.executeCommand(
-          'vscode.previewHtml',
-          previewUri,
-          vscode.ViewColumn.One,
-          'My Window'
-        ).then(null, error => console.error(error));
-      });
-    });
+    var disposable = vscode.commands.registerCommand(
+      'extension.testPreviewHtmlCommunication',
+      function() {
+        promise.then(() => {
+          vscode.commands
+            .executeCommand(
+              'vscode.previewHtml',
+              previewUri,
+              vscode.ViewColumn.One,
+              'My Window'
+            )
+            .then(null, error => console.error(error));
+        });
+      }
+    );
 
     context.subscriptions.push(disposable);
   });
