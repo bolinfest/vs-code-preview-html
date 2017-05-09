@@ -1,3 +1,5 @@
+/** @flow */
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ConnectionDialog from './ConnectionDialog';
@@ -32,11 +34,11 @@ function showConnecting() {
 let lastQuery = '';
 let searchDirectory = '';
 
-function showFileSearch(ws: WebSocket, results: Array<string> = null) {
+function showFileSearch(ws: WebSocket, results: Array<string> = []) {
   const props = {
     query: lastQuery,
     searchDirectory,
-    results: results || [],
+    results,
     doQuery(query: string) {
       lastQuery = query;
       ws.send(JSON.stringify({
@@ -58,7 +60,13 @@ function main(webSocketPort: number) {
   const ws = new WebSocket(`ws://localhost:${webSocketPort}`);
   ws.onopen = function() {
     ws.onmessage = function(message) {
-      const params = JSON.parse(message.data);
+      const {data} = message;
+      if (typeof data !== 'string') {
+        console.error(`Expected message.data to be string but was ${typeof data}`);
+        return;
+      }
+
+      const params = JSON.parse(data);
       const {command} = params;
       if (command === 'initialized.') {
         if (params.searchDirectory == null) {

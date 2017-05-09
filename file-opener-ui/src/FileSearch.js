@@ -1,3 +1,5 @@
+/** @flow */
+
 import React, {Component} from 'react';
 import './FileSearch.css';
 
@@ -53,7 +55,8 @@ export default class FileSearch extends Component {
   }
 
   _onChange(event: Event) {
-    const query = event.target.value;
+    const element: HTMLInputElement = (event.target: any);
+    const query = element.value;
     this.setState({query});
     this.props.doQuery(query);
   }
