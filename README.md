@@ -1,4 +1,4 @@
-# vs-code-preview-html (nuclide-proxy-hack branch)
+# vscode-big-dig-remote-file-demo
 
 This is a demo to see what is possible with respect to extending VS Code to
 support remote file editing.

@@ -125,7 +125,7 @@ function onDidWebSocketServerStartListening(server, context) {
 }
 
 function activate(context) {
-  console.log('Congratulations, your extension "vs-code-preview-html" is now active!');
+  console.log('Congratulations, your extension "vscode-big-dig-remote-file-demo" is now active!');
 
   var promise = new Promise((resolve, reject) => {
     // Note that one drawback to the current implementation is that no

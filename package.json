@@ -1,7 +1,7 @@
 {
-  "name": "vs-code-preview-html",
-  "displayName": "vs-code-preview-html",
-  "description": "Kicking the tires",
+  "name": "vscode-big-dig-remote-file-demo",
+  "displayName": "vscode-big-dig-remote-file-demo",
+  "description": "Demo or reading remote files in VS Code using Big Dig",
   "version": "0.0.1",
   "publisher": "mbolin-at-fb-dot-com",
   "engines": {
