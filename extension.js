@@ -1,4 +1,3 @@
-const invariant = require('assert');
 const vscode = require('vscode');
 const {Server: WebSocketServer} = require('ws');
 const {createConnection} = require('./connection');
@@ -7,7 +6,7 @@ const {SimpleTextDocumentContentProvider} = require('./SimpleTextDocumentContent
 
 const previewUri = vscode.Uri.parse('vs-code-html-preview://authority/vs-code-html-preview');
 
-// This is a WebSocketTransport from nuclide-proxy.
+// This is a WebSocketTransport from big-dig.
 let connection;
 let connectionWrapper;
 let simpleContentProvider;
@@ -32,6 +31,7 @@ function onDidWebSocketServerStartListening(server, context) {
         ws.send(JSON.stringify({
           command: 'initialized.',
           searchDirectory,
+          pathToExtension: context.asAbsolutePath('.'),
         }));
       } else if (command === 'connect') {
         const {host, privateKey, serverCommand, searchDirectory: _searchDirectory} = params;
@@ -146,7 +146,7 @@ function activate(context) {
     // Note that the following code relies on the second argument to
     // registerCommand() being executed asynchronously because `promise` has not
     // been assigned yet.
-    var disposable = vscode.commands.registerCommand('extension.testPreviewHtmlCommunication', function () {
+    var disposable = vscode.commands.registerCommand('extension.bigDigRemoteFileOpenerDemo', () => {
       promise.then(() => {
         vscode.commands.executeCommand(
           'vscode.previewHtml',

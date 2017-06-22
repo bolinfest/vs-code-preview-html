@@ -1,4 +1,4 @@
-var {SshHandshake} = require('nuclide-proxy/src/client/SshHandshake-entry.js');
+var {SshHandshake} = require('big-dig/src/client/SshHandshake');
 var invariant = require('assert');
 
 /**
@@ -66,7 +66,7 @@ function createConnection(username, host, pathToPrivateKey, remoteServerCommand,
       },
       password: '', // Should probably be nullable because of the authMethod.
     });
-  });  
+  });
 }
 
 exports.createConnection = createConnection;

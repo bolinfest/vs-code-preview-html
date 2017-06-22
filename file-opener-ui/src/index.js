@@ -12,7 +12,7 @@ import './index.css';
 
 const rootElement = document.getElementById('root');
 
-function showConnectionDialog(ws: WebSocket) {
+function showConnectionDialog(ws: WebSocket, pathToExtension: string) {
   function onConnect(host, privateKey, serverCommand, searchDirectory) {
     const message = {
       command: 'connect',
@@ -24,7 +24,17 @@ function showConnectionDialog(ws: WebSocket) {
     ws.send(JSON.stringify(message));
     showConnecting();
   }
-  ReactDOM.render(<ConnectionDialog onConnect={onConnect} />, rootElement);
+
+  const serverCommand = `node ${pathToExtension}/server/main.js`;
+  const searchDirectory = `${pathToExtension}/file-opener-ui`;
+  ReactDOM.render(
+    <ConnectionDialog
+      host="localhost"
+      privateKey="~/.ssh/test_id_rsa"
+      serverCommand={serverCommand}
+      searchDirectory={searchDirectory}
+      onConnect={onConnect}
+    />, rootElement);
 }
 
 function showConnecting() {
@@ -70,7 +80,7 @@ function main(webSocketPort: number) {
       const {command} = params;
       if (command === 'initialized.') {
         if (params.searchDirectory == null) {
-          showConnectionDialog(ws);
+          showConnectionDialog(ws, params.pathToExtension);
         } else {
           searchDirectory = params.searchDirectory;
           showFileSearch(ws);

@@ -11,14 +11,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.testPreviewHtmlCommunication"
+    "onCommand:extension.bigDigRemoteFileOpenerDemo"
   ],
   "main": "./extension",
   "contributes": {
     "commands": [
       {
-        "command": "extension.testPreviewHtmlCommunication",
-        "title": "Test vscode.previewHtml() communication"
+        "command": "extension.bigDigRemoteFileOpenerDemo",
+        "title": "Big Dig remote file opener demo"
       }
     ]
   },
@@ -27,6 +27,7 @@
     "test": "node ./node_modules/vscode/bin/test"
   },
   "dependencies": {
+    "big-dig": "0.0.2",
     "ws": "1.1.1"
   },
   "devDependencies": {

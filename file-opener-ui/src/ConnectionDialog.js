@@ -18,7 +18,7 @@ type StateType = {
   searchDirectory: string,
 };
 
-const STORAGE_KEY = 'nuclide-proxy.lastConnection';
+const STORAGE_KEY = 'big-dig.lastConnection';
 
 export default class ConnectionDialog extends Component {
   static defaultProps = {
