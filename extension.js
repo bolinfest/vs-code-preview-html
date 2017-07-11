@@ -1,3 +1,4 @@
+const fs = require('fs');
 const vscode = require('vscode');
 const {Server: WebSocketServer} = require('ws');
 const {createConnection} = require('./connection');
@@ -55,11 +56,33 @@ function onDidWebSocketServerStartListening(server, context) {
           context.subscriptions.push(connectionWrapper);
           context.subscriptions.push({dispose() {connection.close()}});
 
-          simpleContentProvider = new SimpleTextDocumentContentProvider(connectionWrapper);
+          // simpleContentProvider = new SimpleTextDocumentContentProvider(connectionWrapper);
+          // context.subscriptions.push(
+          //   vscode.workspace.registerTextDocumentContentProvider(
+          //     'nuclide',
+          //     simpleContentProvider)
+          // );
           context.subscriptions.push(
-            vscode.workspace.registerTextDocumentContentProvider(
-              'nuclide',
-              simpleContentProvider)
+            vscode.workspace.registerFileSystemProvider('nuclide', {
+              onDidChange: new vscode.EventEmitter().event,
+              resolveContents(resource) {
+                // TODO(jrieken): This method appears to get invoked more often than I would expect!
+
+                // Strip the leading slash from resource.path.
+                const path = resource.path.substring(1);
+                return connectionWrapper.makeRpc(
+                  'get-file-contents',
+                  {path}
+                ).then(response => response.contents);
+              },
+              writeContents(resource, value) {
+                // Strip the leading slash from resource.path.
+                const path = resource.path.substring(1);
+                return new Promise((resolve, reject) => {
+                  fs.writeFile(path, value, err => err ? reject(err) : resolve());
+                });
+              }
+            })
           );
 
           ws.send(JSON.stringify({
@@ -88,7 +111,8 @@ function onDidWebSocketServerStartListening(server, context) {
         const {file} = params;
         const address = connection.getAddress();
         const remotePath = `${searchDirectory}/${file}`;
-        const uri = `${address.replace(/^wss?:/, 'nuclide:')}${remotePath}`;
+        // const uri = `${address.replace(/^wss?:/, 'nuclide:')}${remotePath}`;
+        const uri = `file://nuclide/${remotePath}`;
         vscode.workspace.openTextDocument(vscode.Uri.parse(uri)).then(
           textDocument => vscode.window.showTextDocument(textDocument, vscode.ViewColumn.Two, /* preserveFocus */ true),
           error => console.error(`Failed to open text document for uri '${uri}'`, error));
